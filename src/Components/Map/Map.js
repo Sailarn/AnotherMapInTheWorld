@@ -21,7 +21,7 @@ class GoogleMap extends React.Component {
     componentDidMount() {
         let map = new google.maps.Map(document.getElementById('map'), {
             center: this.state.center,
-            zoom: 7,
+            zoom: 5,
             mapTypeId: 'roadmap',
         });
 
