@@ -5,7 +5,6 @@ import {
     MDBNavbar,
     MDBNavbarBrand,
     MDBNavbarNav,
-    MDBNavItem,
     MDBNavbarToggler,
     MDBCollapse,
     MDBBtn,
@@ -17,7 +16,8 @@ import {
     MDBCardTitle,
     MDBCardText,
     MDBCol,
-    MDBListGroup, MDBListGroupItem
+    MDBListGroup,
+    MDBListGroupItem
 } from "mdbreact";
 import {fromWaypoint} from "./store/actions/mapAction";
 import {connect} from "react-redux";
@@ -31,6 +31,7 @@ import arrayMove from 'array-move';
 /* global google */
 
 let SortableItem, SortableList;
+
 class App extends Component {
     state = {
         isOpen: false,
@@ -40,7 +41,7 @@ class App extends Component {
         polyline: [],
         markers: [],
         addresses: [],
-        test: true
+        editMode: true
     };
 
     componentDidUpdate() {
@@ -53,13 +54,13 @@ class App extends Component {
                 </MDBListGroupItem>
             </div>);
 
-        SortableList  = SortableContainer(({items}) => {
+        SortableList = SortableContainer(({items}) => {
             return (
-                <ul>
+                <div>
                     {items.map((value, index) => (
                         <SortableItem key={`item-${index}`} index={index} value={value}/>
                     ))}
-                </ul>
+                </div>
             );
         });
     }
@@ -148,25 +149,23 @@ class App extends Component {
         let markers = this.state.markers;
         let addresses = this.state.addresses;
         let waypoints = this.state.waypoints;
+        let length = markers.length;
         for (let i = 0; i < markers.length; i++) {
             markers[i].setMap(null);
-
         }
-        markers.splice(0, markers.length - 1);
-        waypoints.splice(0, markers.length - 1);
-        addresses.splice(0, markers.length - 1);
+        markers = [];
+        addresses = [];
         this.setState({
             markers,
             waypoints,
             addresses
         })
-        console.log(this.state);
     }
     createRoute = () => {
         this.deleteAllMarkers();
         let request;
-        let directionsService = new google.maps.DirectionsService;
-        let directionsDisplay = new google.maps.DirectionsRenderer;
+        let directionsService = new google.maps.DirectionsService();
+        let directionsDisplay = new google.maps.DirectionsRenderer();
 
         directionsDisplay.setOptions({suppressMarkers: false, draggable: true});
 
@@ -208,7 +207,7 @@ class App extends Component {
         latLng = {lat: latLng.getPosition().lat(), lng: latLng.getPosition().lng()}
         this.props.google.setCenter(latLng)
     }
-    recreatePoly = () =>{
+    recreatePoly = () => {
         let waypoints = this.state.waypoints;
         let polyline = this.state.polyline;
         polyline = new google.maps.Polyline({
@@ -271,17 +270,63 @@ class App extends Component {
         this.recreatePoly();
 
     };
+
     render() {
         let item;
-        if(this.state.test){
+        let autocomplete;
+        if (this.state.editMode) {
             item = this.addListItem();
-        }
-        else{
+        } else {
             item =
                 (<SortableList items={this.state.addresses} onSortEnd={this.onSortEnd}/>);
         }
+        autocomplete = (<PlacesAutocomplete
+            value={this.state.valueFrom}
+            onChange={valueFrom => this.setState({valueFrom})}
+            onSelect={this.handleSelect}
+        >
+            {({getInputProps, suggestions, getSuggestionItemProps, loading}) => (
+                <div>
+                    <MDBInput
+                        hint="From"
+                        id="from_value"
+                        name="valueFrom"
+                        //value={this.state.fromValue}
+                        {...getInputProps({
+                            placeholder: 'Search Places ...',
+                            className: 'location-search-input',
+                        })}
+                    />
+                    <div className="autocomplete-dropdown-container">
+                        {loading && <div>Loading...</div>}
+                        {suggestions.map(suggestion => {
+                            const className = suggestion.active
+                                ? 'suggestion-item--active'
+                                : 'suggestion-item';
+                            // inline style for demonstration purpose
+                            const style = suggestion.active
+                                ? {backgroundColor: '#fafafa', cursor: 'pointer'}
+                                : {backgroundColor: '#ffffff', cursor: 'pointer'};
+                            return (
+                                <div
+                                    {...getSuggestionItemProps(suggestion, {
+                                        className,
+                                        style,
+                                    })}
+                                >
+                                    <span>{suggestion.description}</span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+        </PlacesAutocomplete>)
         return (
             <div className="App">
+                {!this.props.google ? <div className="preloader">
+                    <div className="spinner-grow text-info" role="status"></div>
+                </div> : false}
                 <MDBNavbar color="indigo" dark expand="md">
                     <MDBNavbarBrand>
                         <strong className="white-text">RouteFinder</strong>
@@ -289,9 +334,7 @@ class App extends Component {
                     <MDBNavbarToggler onClick={() => this.setState({isOpen: !this.state.isOpen})}/>
                     <MDBCollapse id="navbarCollapse3" isOpen={this.state.isOpen} navbar>
                         <MDBNavbarNav left>
-                            <MDBNavItem active>
-                                <MDBBtn size="sm">Create Route</MDBBtn>
-                            </MDBNavItem>
+
                         </MDBNavbarNav>
                     </MDBCollapse>
                 </MDBNavbar>
@@ -300,61 +343,21 @@ class App extends Component {
                         <MDBCol size="4">
                             <MDBCard>
                                 <MDBCardBody>
-                                    <MDBCardTitle>Card title</MDBCardTitle>
+                                    <MDBCardTitle>Settings</MDBCardTitle>
                                     <MDBCardText>
-                                        Some quick example text to build on the card title and make
-                                        up the bulk of the card&apos;s content.
+                                        You can choose variant with arrows and press Enter to add a waypoint.
                                     </MDBCardText>
-                                    <PlacesAutocomplete
-                                        value={this.state.valueFrom}
-                                        onChange={valueFrom => this.setState({valueFrom})}
-                                        onSelect={this.handleSelect}
-                                    >
-                                        {({getInputProps, suggestions, getSuggestionItemProps, loading}) => (
-                                            <div>
-                                                <MDBInput
-                                                    hint="From"
-                                                    id="from_value"
-                                                    name="valueFrom"
-                                                    //value={this.state.fromValue}
-                                                    {...getInputProps({
-                                                        placeholder: 'Search Places ...',
-                                                        className: 'location-search-input',
-                                                    })}
-                                                />
-                                                <div className="autocomplete-dropdown-container">
-                                                    {loading && <div>Loading...</div>}
-                                                    {suggestions.map(suggestion => {
-                                                        const className = suggestion.active
-                                                            ? 'suggestion-item--active'
-                                                            : 'suggestion-item';
-                                                        // inline style for demonstration purpose
-                                                        const style = suggestion.active
-                                                            ? {backgroundColor: '#fafafa', cursor: 'pointer'}
-                                                            : {backgroundColor: '#ffffff', cursor: 'pointer'};
-                                                        return (
-                                                            <div
-                                                                {...getSuggestionItemProps(suggestion, {
-                                                                    className,
-                                                                    style,
-                                                                })}
-                                                            >
-                                                                <span>{suggestion.description}</span>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </PlacesAutocomplete>
+                                    {this.props.google ? autocomplete : false}
                                     <MDBBtn size="md" onClick={this.createRoute}>Create Route</MDBBtn>
-                                    <MDBBtn size="md" onClick={() => {
-                                        this.setState({
-                                            test: !this.state.test
-                                        })
-                                        console.log(this.state.test)
-                                    }}>Test</MDBBtn>
-
+                                    <input type="checkbox"
+                                           id="id-name--1"
+                                           name="edit-mode"
+                                           className="switch-input"
+                                           onChange={() => this.setState({editMode: !this.state.editMode})}
+                                    />
+                                    <label htmlFor="id-name--1" className="switch-label">Edit mode <span
+                                        className="toggle--on">On</span><span
+                                        className="toggle--off">Off</span></label>
                                     <MDBListGroup style={{marginTop: '25px'}}>
                                         {this.state.addresses.length >= 1 ? item : false}
                                     </MDBListGroup>
@@ -365,7 +368,7 @@ class App extends Component {
                         <MDBCol size="8">
                             <MDBCard>
                                 <MDBCardBody>
-                                    <MDBCardTitle>Card title</MDBCardTitle>
+                                    <MDBCardTitle>Map</MDBCardTitle>
                                     <GoogleMap/>
                                 </MDBCardBody>
                             </MDBCard>

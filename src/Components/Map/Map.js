@@ -18,7 +18,17 @@ class GoogleMap extends React.Component {
         };
     }
 
+    loadGoogleData = (map) => {
+        this.props.googleApi(map);
+        this.setState({
+            loaded: true,
+            map: map
+        })
+    }
+
     componentDidMount() {
+        setTimeout(() =>{
+
         let map = new google.maps.Map(document.getElementById('map'), {
             center: this.state.center,
             zoom: 5,
@@ -29,6 +39,7 @@ class GoogleMap extends React.Component {
         if (this.state.loaded === false) {
             this.loadGoogleData(map);
         }
+        },500)
     }
 
 
