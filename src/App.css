@@ -19,6 +19,16 @@
 .delete-item-btn{
     color: #212529;
 }
+.card-body{
+    height: 90vh !important;
+}
+.scroll-card{
+    overflow-y: scroll;
+}
+.index-class{
+    border-right: none;
+    border-left: 1px solid rgba(0,0,0,.125);
+}
 .list-item-box{
     margin-bottom: 5px;
     display: flex;
@@ -97,4 +107,23 @@
 }
 .switch-input:checked + .switch-label .toggle--off {
     display: none;
+}
+@media screen and (max-width: 1024px) {
+    .row{
+        justify-content: center;
+        align-items: center;
+        flex-direction: column-reverse;
+    }
+    .col-4, .col-8{
+        max-width: 100% !important;
+        margin-bottom: 20px;
+    }
+}
+@media screen and (max-width: 380px) {
+    .options{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
 }

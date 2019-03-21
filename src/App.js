@@ -4,9 +4,6 @@ import GoogleMap from './Components/Map/Map'
 import {
     MDBNavbar,
     MDBNavbarBrand,
-    MDBNavbarNav,
-    MDBNavbarToggler,
-    MDBCollapse,
     MDBBtn,
     MDBRow,
     MDBContainer,
@@ -35,13 +32,18 @@ let SortableItem, SortableList;
 class App extends Component {
     state = {
         isOpen: false,
-        valueFrom: '',
         fromLatLng: '',
         waypoints: [],
         polyline: [],
         markers: [],
         addresses: [],
-        editMode: true
+        editMode: true,
+        valueFrom: '',
+        routes: [],
+        tempAddress: '',
+        latLng: '',
+        error: false,
+        addressesCopy: []
     };
 
     componentDidUpdate() {
@@ -77,7 +79,9 @@ class App extends Component {
 
         let marker = new google.maps.Marker({
             position: latLng,
-            map: this.props.google
+            map: this.props.google,
+            draggable: true,
+            animation: google.maps.Animation.DROP
         });
         markers.push(marker);
         polyline = new google.maps.Polyline({
@@ -99,38 +103,63 @@ class App extends Component {
         marker.addListener('click', () => {
             infowindow.open(this.props.google, marker);
         });
-        // google.maps.event.addListener(marker, 'click', (event) => {
-        //     this.removePoint(marker);
-        // });
+        google.maps.event.addListener(marker, 'dragend', () => {
+            this.getNewAddress(marker, marker.getPosition());
+            setTimeout(() => {
+                infowindow.setContent(this.state.tempAddress);
+            }, 500);
+        });
 
     }
+    getNewAddress = (marker, pos) => {
+        let polyline = this.state.polyline;
+        polyline.setMap(null);
+        this.setState({
+            polyline
+        })
+        let markers = this.state.markers;
+        let waypoints = this.state.waypoints;
+        let addresses = this.state.addresses;
+        let localPosition;
+        for (const [index, value] of markers.entries()) {
+            if (marker === value) {
+                localPosition = index;
+            }
+        }
+        let geocoder = new google.maps.Geocoder();
+        geocoder.geocode({latLng: pos}, (results, status) => {
+                if (status === google.maps.GeocoderStatus.OK) {
+                    addresses[localPosition] = results[0].formatted_address;
+                    let localLatLng = {
+                        lat: results[0].geometry.location.lat(),
+                        lng: results[0].geometry.location.lng()
+                    };
+                    markers[localPosition] = marker;
+                    waypoints[localPosition] = localLatLng;
+                    this.setState({
+                        markers,
+                        addresses,
+                        waypoints,
+                        tempAddress: results[0].formatted_address
+                    })
+                } else {
+                    console.log('Error: ', status);
+                }
+            }
+        );
 
-    // removePoint(marker) {
-    //     let markers = this.state.markers;
-    //     let waypoints = this.state.waypoints;
-    //     for (var i = 0; i < markers.length; i++) {
-    //         console.log(marker, markers)
-    //         if (markers[i] === marker) {
-    //             markers[i].setMap(null);
-    //             markers.splice(i, 1);
-    //             waypoints.splice(i, 1);
-    //             this.state.polyline.getPath().removeAt(i);
-    //             this.setState({
-    //                 markers,
-    //                 waypoints
-    //             })
-    //         }
-    //     }
-    // }
-
+        setTimeout(() => {
+            this.recreatePoly();
+        }, 500);
+    }
     deleteMarker = (event) => {
         let markers = this.state.markers;
         let marker = markers[event];
         let addresses = this.state.addresses;
         let waypoints = this.state.waypoints;
-        for (var i = 0; i < markers.length; i++) {
-            if (markers[i] === marker) {
-                markers[i].setMap(null);
+        for (const [i, item] of markers.entries()) {
+            if (item === marker) {
+                item.setMap(null);
                 markers.splice(i, 1);
                 waypoints.splice(i, 1);
                 addresses.splice(i, 1);
@@ -148,26 +177,32 @@ class App extends Component {
         this.state.polyline.setMap(null);
         let markers = this.state.markers;
         let addresses = this.state.addresses;
-        let waypoints = this.state.waypoints;
-        let length = markers.length;
-        for (let i = 0; i < markers.length; i++) {
-            markers[i].setMap(null);
+        for (const item of markers) {
+            item.setMap(null);
         }
         markers = [];
         addresses = [];
         this.setState({
             markers,
-            waypoints,
             addresses
         })
     }
     createRoute = () => {
+        if (this.state.waypoints.length < 2) {
+            return;
+        }
+        let address = this.state.addresses;
+        let addressesCopy = this.state.addressesCopy;
+        addressesCopy.push({from: address[0], to: address[address.length - 1]});
+        this.setState({
+            addressesCopy
+        })
         this.deleteAllMarkers();
         let request;
         let directionsService = new google.maps.DirectionsService();
         let directionsDisplay = new google.maps.DirectionsRenderer();
 
-        directionsDisplay.setOptions({suppressMarkers: false, draggable: true});
+        directionsDisplay.setOptions({suppressMarkers: false});
 
         directionsDisplay.setMap(this.props.google);
 
@@ -180,18 +215,18 @@ class App extends Component {
             waypoints.splice(0, 1);
             waypoints.splice(waypoints.length - 1, 1);
             request = {
-                origin: new google.maps.LatLng(this.state.waypoints[0]), //точка старта
-                destination: new google.maps.LatLng(this.state.waypoints[this.state.waypoints.length - 1]), //точка финиша
+                origin: new google.maps.LatLng(this.state.waypoints[0]),
+                destination: new google.maps.LatLng(this.state.waypoints[this.state.waypoints.length - 1]),
                 waypoints: waypoints,
                 optimizeWaypoints: false,
-                travelMode: google.maps.DirectionsTravelMode.WALKING //режим прокладки маршрута
+                travelMode: google.maps.DirectionsTravelMode.DRIVING
             };
         } else {
             request = {
-                origin: new google.maps.LatLng(this.state.waypoints[0]), //точка старта
-                destination: new google.maps.LatLng(this.state.waypoints[this.state.waypoints.length - 1]), //точка финиша
+                origin: new google.maps.LatLng(this.state.waypoints[0]),
+                destination: new google.maps.LatLng(this.state.waypoints[this.state.waypoints.length - 1]),
                 optimizeWaypoints: false,
-                travelMode: google.maps.DirectionsTravelMode.WALKING //режим прокладки маршрута
+                travelMode: google.maps.DirectionsTravelMode.DRIVING
             };
         }
         directionsService.route(request, function (response, status) {
@@ -200,6 +235,26 @@ class App extends Component {
             }
         });
         directionsDisplay.setMap(this.props.google);
+        let mapWaypoints = this.state.waypoints;
+        let routes = this.state.routes;
+        mapWaypoints = [];
+        routes.push(directionsDisplay);
+        this.setState({
+            waypoints: mapWaypoints,
+            routes
+        })
+
+    }
+    deleteRoute = (event) => {
+        let addressesCopy = this.state.addressesCopy;
+        let routes = this.state.routes;
+        addressesCopy.splice(event, 1);
+        routes[event].setMap(null);
+        routes.splice(event, 1);
+        this.setState({
+            routes,
+            addressesCopy
+        })
     }
     setPointAsCenter = (event) => {
         console.log(event)
@@ -228,6 +283,9 @@ class App extends Component {
             let address = this.state.addresses[pos];
             return (
                 <div key={'item-' + index} className="list-item-box">
+                    <div className="delete-item-box index-class" key={'indexBox-' + index}>
+                        <span key={'index-' + index} className="delete-item-btn">{index + 1}</span>
+                    </div>
                     <MDBListGroupItem
                         onClick={this.setPointAsCenter.bind(null, pos)}
                         hover
@@ -244,19 +302,33 @@ class App extends Component {
 
     handleSelect = address => {
         let addresses = this.state.addresses;
-        addresses.push(address);
-        this.setState({
-            addresses
-        })
         geocodeByAddress(address)
             .then(results => getLatLng(results[0]))
             .then(latLng => {
-                this.setPoint(latLng, address)
                 this.setState({
-                    valueFrom: ''
+                    valueFrom: '',
+                    latLng
                 })
             })
-            .catch(error => console.error('Error', error));
+            .catch(() => {
+                this.setState({
+                    error: !this.state.error
+                })
+            });
+        setTimeout(() => {
+            if (!this.state.error) {
+                addresses.push(address);
+                this.setState({
+                    addresses
+                })
+                this.setPoint(this.state.latLng, address)
+            } else {
+
+                this.setState({
+                    error: !this.state.error
+                })
+            }
+        }, 500)
     };
     onSortEnd = ({oldIndex, newIndex}) => {
         let polyline = this.state.polyline;
@@ -268,18 +340,42 @@ class App extends Component {
             polyline
         }));
         this.recreatePoly();
-
     };
+    listOfRoutes = () => {
+        return Object.keys(this.state.routes).map((pos, index) => {
+            let address = this.state.addressesCopy[pos];
+            let fromAddress = address.from;
+            let toAddress = address.to;
+            return (
+                <div key={'item-' + index} className="list-item-box">
+                    <div className="delete-item-box index-class" key={'indexBox-' + index}>
+                        <span key={'index-' + index} className="delete-item-btn">{index + 1}</span>
+                    </div>
+                    <MDBListGroupItem
+                        hover
+                        key={index}
+                    >From: {fromAddress} To: {toAddress}
+                    </MDBListGroupItem>
+                    <div className="delete-item-box" key={'box-' + index}
+                         onClick={this.deleteRoute.bind(null, pos)}>
+                        <span key={'x-' + index} className="delete-item-btn">X</span>
+                    </div>
+                </div>
+            );
+        });
+
+    }
 
     render() {
-        let item;
-        let autocomplete;
+        let item, autocomplete, itemRoute;
+
         if (this.state.editMode) {
             item = this.addListItem();
         } else {
             item =
                 (<SortableList items={this.state.addresses} onSortEnd={this.onSortEnd}/>);
         }
+        itemRoute = this.listOfRoutes();
         autocomplete = (<PlacesAutocomplete
             value={this.state.valueFrom}
             onChange={valueFrom => this.setState({valueFrom})}
@@ -288,22 +384,20 @@ class App extends Component {
             {({getInputProps, suggestions, getSuggestionItemProps, loading}) => (
                 <div>
                     <MDBInput
-                        hint="From"
+                        hint="Add waypoint"
                         id="from_value"
                         name="valueFrom"
-                        //value={this.state.fromValue}
                         {...getInputProps({
                             placeholder: 'Search Places ...',
                             className: 'location-search-input',
                         })}
                     />
                     <div className="autocomplete-dropdown-container">
-                        {loading && <div>Loading...</div>}
+                        {loading && <div className="spinner-grow text-info" role="status"></div>}
                         {suggestions.map(suggestion => {
                             const className = suggestion.active
                                 ? 'suggestion-item--active'
                                 : 'suggestion-item';
-                            // inline style for demonstration purpose
                             const style = suggestion.active
                                 ? {backgroundColor: '#fafafa', cursor: 'pointer'}
                                 : {backgroundColor: '#ffffff', cursor: 'pointer'};
@@ -331,37 +425,32 @@ class App extends Component {
                     <MDBNavbarBrand>
                         <strong className="white-text">RouteFinder</strong>
                     </MDBNavbarBrand>
-                    <MDBNavbarToggler onClick={() => this.setState({isOpen: !this.state.isOpen})}/>
-                    <MDBCollapse id="navbarCollapse3" isOpen={this.state.isOpen} navbar>
-                        <MDBNavbarNav left>
-
-                        </MDBNavbarNav>
-                    </MDBCollapse>
                 </MDBNavbar>
                 <MDBContainer fluid style={{marginTop: '20px'}}>
                     <MDBRow around style={{display: 'flex', flexWrap: 'wrap'}}>
                         <MDBCol size="4">
                             <MDBCard>
-                                <MDBCardBody>
+                                <MDBCardBody className="scroll-card">
                                     <MDBCardTitle>Settings</MDBCardTitle>
                                     <MDBCardText>
                                         You can choose variant with arrows and press Enter to add a waypoint.
                                     </MDBCardText>
                                     {this.props.google ? autocomplete : false}
-                                    <MDBBtn size="md" onClick={this.createRoute}>Create Route</MDBBtn>
-                                    <input type="checkbox"
-                                           id="id-name--1"
-                                           name="edit-mode"
-                                           className="switch-input"
-                                           onChange={() => this.setState({editMode: !this.state.editMode})}
-                                    />
-                                    <label htmlFor="id-name--1" className="switch-label">Edit mode <span
-                                        className="toggle--on">On</span><span
-                                        className="toggle--off">Off</span></label>
+                                    <div className="options">
+                                        <MDBBtn size="sm" onClick={this.createRoute}>Create Route</MDBBtn>
+                                        <input type="checkbox"
+                                               id="id-name--1"
+                                               name="edit-mode"
+                                               className="switch-input"
+                                               onChange={() => this.setState({editMode: !this.state.editMode})}
+                                        />
+                                        <label htmlFor="id-name--1" className="switch-label">Edit mode <span
+                                            className="toggle--on">On</span><span
+                                            className="toggle--off">Off</span></label>
+                                    </div>
                                     <MDBListGroup style={{marginTop: '25px'}}>
                                         {this.state.addresses.length >= 1 ? item : false}
                                     </MDBListGroup>
-
                                 </MDBCardBody>
                             </MDBCard>
                         </MDBCol>
@@ -370,6 +459,9 @@ class App extends Component {
                                 <MDBCardBody>
                                     <MDBCardTitle>Map</MDBCardTitle>
                                     <GoogleMap/>
+                                    <MDBListGroup style={{marginTop: '25px'}}>
+                                        {this.state.routes.length > 0 ? itemRoute : false}
+                                    </MDBListGroup>
                                 </MDBCardBody>
                             </MDBCard>
                         </MDBCol>
