@@ -2,19 +2,15 @@ import React from 'react';
 import './map.css'
 import {connect} from "react-redux";
 import {googleApi} from '../../store/actions/mapAction'
-//<script defer async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDfXMtNQ9WiZVSmJx8FI0EwzFKhyzwM6vg"></script>
 /*global google*/
 
 class GoogleMap extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            mapIsReady: false,
             center: {lat: 46.482886, lng: 30.735430},
             map: '',
-            loaded: false,
-            city: '',
-            query: ''
+            loaded: false
         };
     }
 
@@ -35,14 +31,11 @@ class GoogleMap extends React.Component {
             mapTypeId: 'roadmap',
         });
 
-
         if (this.state.loaded === false) {
             this.loadGoogleData(map);
         }
         },500)
     }
-
-
 
     loadGoogleData = (map) => {
         this.props.googleApi(map);
@@ -53,14 +46,9 @@ class GoogleMap extends React.Component {
     }
 
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-
-    }
-
     render() {
         return (
-            <div id="map">
-            </div>
+            <div id="map"></div>
         );
     }
 }
@@ -71,15 +59,7 @@ function mapDispatchToProps(dispatch) {
     };
 }
 
-function mapStateToProps(state) {
-    return {
-        google: state.map.google,
-        fromValue: state.map.fromWaypoint
-    };
-}
-
 export default connect(
-    mapStateToProps,
+    null,
     mapDispatchToProps
 )(GoogleMap);
-//https://maps.googleapis.com/maps/api/js?key=AIzaSyDfXMtNQ9WiZVSmJx8FI0EwzFKhyzwM6vg

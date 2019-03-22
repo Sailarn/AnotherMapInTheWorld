@@ -257,7 +257,6 @@ class App extends Component {
         })
     }
     setPointAsCenter = (event) => {
-        console.log(event)
         let latLng = this.state.markers[event];
         latLng = {lat: latLng.getPosition().lat(), lng: latLng.getPosition().lng()}
         this.props.google.setCenter(latLng)
@@ -305,9 +304,11 @@ class App extends Component {
         geocodeByAddress(address)
             .then(results => getLatLng(results[0]))
             .then(latLng => {
+                addresses.push(address);
                 this.setState({
                     valueFrom: '',
-                    latLng
+                    latLng,
+                    addresses
                 })
             })
             .catch(() => {
@@ -317,18 +318,13 @@ class App extends Component {
             });
         setTimeout(() => {
             if (!this.state.error) {
-                addresses.push(address);
-                this.setState({
-                    addresses
-                })
                 this.setPoint(this.state.latLng, address)
             } else {
-
                 this.setState({
                     error: !this.state.error
                 })
             }
-        }, 500)
+        }, 1000)
     };
     onSortEnd = ({oldIndex, newIndex}) => {
         let polyline = this.state.polyline;

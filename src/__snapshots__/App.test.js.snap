@@ -1,0 +1,154 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MyComponent Render App component correctly 1`] = `
+<div
+  className="App"
+>
+  <div
+    className="preloader"
+  >
+    <div
+      className="spinner-grow text-info"
+      role="status"
+    />
+  </div>
+  <nav
+    className="navbar navbar-dark navbar-expand-md indigo"
+    role="navigation"
+  >
+    <div
+      className="navbar-brand"
+    >
+      <strong
+        className="white-text"
+      >
+        RouteFinder
+      </strong>
+    </div>
+  </nav>
+  <div
+    className="container-fluid"
+    style={
+      Object {
+        "marginTop": "20px",
+      }
+    }
+  >
+    <div
+      className="row justify-content-around"
+      style={
+        Object {
+          "display": "flex",
+          "flexWrap": "wrap",
+        }
+      }
+    >
+      <div
+        className="col-4"
+      >
+        <div
+          className="card"
+        >
+          <div
+            className="card-body scroll-card"
+          >
+            <h4
+              className="card-title"
+            >
+              Settings
+            </h4>
+            <p
+              className="card-text"
+            >
+              You can choose variant with arrows and press Enter to add a waypoint.
+            </p>
+            <div
+              className="options"
+            >
+              <button
+                className="btn btn-default btn-sm Ripple-parent"
+                onClick={[Function]}
+                onMouseUp={[Function]}
+                onTouchStart={[Function]}
+                type="button"
+              >
+                Create Route
+                <div
+                  className="Ripple "
+                  style={
+                    Object {
+                      "height": "0px",
+                      "left": "0px",
+                      "top": "0px",
+                      "width": "0px",
+                    }
+                  }
+                />
+              </button>
+              <input
+                className="switch-input"
+                id="id-name--1"
+                name="edit-mode"
+                onChange={[Function]}
+                type="checkbox"
+              />
+              <label
+                className="switch-label"
+                htmlFor="id-name--1"
+              >
+                Edit mode 
+                <span
+                  className="toggle--on"
+                >
+                  On
+                </span>
+                <span
+                  className="toggle--off"
+                >
+                  Off
+                </span>
+              </label>
+            </div>
+            <ul
+              className="list-group"
+              style={
+                Object {
+                  "marginTop": "25px",
+                }
+              }
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        className="col-8"
+      >
+        <div
+          className="card"
+        >
+          <div
+            className="card-body"
+          >
+            <h4
+              className="card-title"
+            >
+              Map
+            </h4>
+            <div
+              id="map"
+            />
+            <ul
+              className="list-group"
+              style={
+                Object {
+                  "marginTop": "25px",
+                }
+              }
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
