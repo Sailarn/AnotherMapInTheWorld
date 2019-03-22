@@ -1,4 +1,11 @@
 # RouteFinder
+Map live: https://sailarn.github.io/AnotherMapInTheWorld/build
+To launch it from the source code:
+* Download it
+* npm install to install required node_modules
+* yarn start / npm start to start dev server
+* yarn build / npm build to build a production version
+* yarn test / npm test to launch tests
 
 ## About:
 Application based on React. It is a map with settings. You can add a waypoint by entering a name of it in field "Add a waypoint".
