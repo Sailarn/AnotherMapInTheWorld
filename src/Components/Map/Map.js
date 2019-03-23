@@ -2,6 +2,7 @@ import React from 'react';
 import './map.css'
 import {connect} from "react-redux";
 import {googleApi} from '../../store/actions/mapAction'
+
 /*global google*/
 
 class GoogleMap extends React.Component {
@@ -23,18 +24,19 @@ class GoogleMap extends React.Component {
     }
 
     componentDidMount() {
-        setTimeout(() =>{
+        setTimeout(() => {
 
-        let map = new google.maps.Map(document.getElementById('map'), {
-            center: this.state.center,
-            zoom: 5,
-            mapTypeId: 'roadmap',
-        });
+            let map = new google.maps.Map(document.getElementById('map'), {
+                center: this.state.center,
+                zoom: 5,
+                mapTypeId: 'roadmap',
+                gestureHandling: 'greedy'
+            });
 
-        if (this.state.loaded === false) {
-            this.loadGoogleData(map);
-        }
-        },500)
+            if (this.state.loaded === false) {
+                this.loadGoogleData(map);
+            }
+        }, 500)
     }
 
     loadGoogleData = (map) => {

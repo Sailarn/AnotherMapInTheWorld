@@ -8,15 +8,10 @@ import {
     MDBRow,
     MDBContainer,
     MDBInput,
-    MDBCard,
-    MDBCardBody,
-    MDBCardTitle,
     MDBCardText,
-    MDBCol,
     MDBListGroup,
     MDBListGroupItem
 } from "mdbreact";
-import {fromWaypoint} from "./store/actions/mapAction";
 import {connect} from "react-redux";
 import PlacesAutocomplete, {
     geocodeByAddress,
@@ -24,8 +19,10 @@ import PlacesAutocomplete, {
 } from 'react-places-autocomplete';
 import {SortableContainer, SortableElement} from 'react-sortable-hoc';
 import arrayMove from 'array-move';
+import Wrapper from "./Components/Map/Wrapper";
 
 /* global google */
+
 
 let SortableItem, SortableList;
 
@@ -48,6 +45,7 @@ class App extends Component {
 
     componentDidUpdate() {
         SortableItem = SortableElement(({value}) =>
+
             <div
                 className="list-item-box">
                 <MDBListGroupItem
@@ -291,7 +289,8 @@ class App extends Component {
                         key={index}
                     >{address}
                     </MDBListGroupItem>
-                    <div className="delete-item-box" key={'box-' + index} onClick={this.deleteMarker.bind(null, pos)}>
+                    <div className="delete-item-box" key={'box-' + index}
+                         onClick={this.deleteMarker.bind(null, pos)}>
                         <span key={'x-' + index} className="delete-item-btn">X</span>
                     </div>
                 </div>
@@ -423,44 +422,34 @@ class App extends Component {
                     </MDBNavbarBrand>
                 </MDBNavbar>
                 <MDBContainer fluid style={{marginTop: '20px'}}>
-                    <MDBRow around style={{display: 'flex', flexWrap: 'wrap'}}>
-                        <MDBCol size="4">
-                            <MDBCard>
-                                <MDBCardBody className="scroll-card">
-                                    <MDBCardTitle>Settings</MDBCardTitle>
-                                    <MDBCardText>
-                                        You can choose variant with arrows and press Enter to add a waypoint.
-                                    </MDBCardText>
-                                    {this.props.google ? autocomplete : false}
-                                    <div className="options">
-                                        <MDBBtn size="sm" onClick={this.createRoute}>Create Route</MDBBtn>
-                                        <input type="checkbox"
-                                               id="id-name--1"
-                                               name="edit-mode"
-                                               className="switch-input"
-                                               onChange={() => this.setState({editMode: !this.state.editMode})}
-                                        />
-                                        <label htmlFor="id-name--1" className="switch-label">Edit mode <span
-                                            className="toggle--on">On</span><span
-                                            className="toggle--off">Off</span></label>
-                                    </div>
-                                    <MDBListGroup style={{marginTop: '25px'}}>
-                                        {this.state.addresses.length >= 1 ? item : false}
-                                    </MDBListGroup>
-                                </MDBCardBody>
-                            </MDBCard>
-                        </MDBCol>
-                        <MDBCol size="8">
-                            <MDBCard>
-                                <MDBCardBody>
-                                    <MDBCardTitle>Map</MDBCardTitle>
-                                    <GoogleMap/>
-                                    <MDBListGroup style={{marginTop: '25px'}}>
-                                        {this.state.routes.length > 0 ? itemRoute : false}
-                                    </MDBListGroup>
-                                </MDBCardBody>
-                            </MDBCard>
-                        </MDBCol>
+                    <MDBRow around>
+                        <Wrapper title="Settings" size="6">
+                            <MDBCardText>
+                                You can choose variant with arrows and press Enter to add a waypoint.
+                            </MDBCardText>
+                            {this.props.google ? autocomplete : false}
+                            <div className="options">
+                                <MDBBtn size="sm" onClick={this.createRoute}>Create Route</MDBBtn>
+                                <input type="checkbox"
+                                       id="id-name--1"
+                                       name="edit-mode"
+                                       className="switch-input"
+                                       onChange={() => this.setState({editMode: !this.state.editMode})}
+                                />
+                                <label htmlFor="id-name--1" className="switch-label">Edit mode <span
+                                    className="toggle--on">On</span><span
+                                    className="toggle--off">Off</span></label>
+                            </div>
+                            <MDBListGroup style={{marginTop: '25px'}}>
+                                {this.state.addresses.length >= 1 ? item : false}
+                            </MDBListGroup>
+                        </Wrapper>
+                        <Wrapper title="Map" size="6">
+                            <GoogleMap/>
+                            <MDBListGroup style={{marginTop: '25px'}}>
+                                {this.state.routes.length > 0 ? itemRoute : false}
+                            </MDBListGroup>
+                        </Wrapper>
                     </MDBRow>
                 </MDBContainer>
             </div>
@@ -468,20 +457,12 @@ class App extends Component {
     }
 }
 
-function mapDispatchToProps(dispatch) {
-    return {
-        fromWaypoint: waypoint => dispatch(fromWaypoint(waypoint))
-    };
-}
-
 function mapStateToProps(state) {
     return {
-        google: state.map.google,
-        fromValue: state.map.fromWaypoint
+        google: state.map.google
     };
 }
 
 export default connect(
-    mapStateToProps,
-    mapDispatchToProps
+    mapStateToProps
 )(App);

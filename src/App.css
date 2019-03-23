@@ -123,7 +123,7 @@
         align-items: center;
         flex-direction: column-reverse;
     }
-    .col-4, .col-8{
+    .col-6{
         max-width: 100% !important;
         margin-bottom: 20px;
     }
