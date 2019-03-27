@@ -13,7 +13,7 @@ exports[`MyComponent Render App component correctly 1`] = `
     />
   </div>
   <nav
-    className="navbar navbar-dark navbar-expand-md indigo"
+    className="navbar navbar-dark navbar-expand-md elegant-color-dark"
     role="navigation"
   >
     <div
@@ -25,23 +25,39 @@ exports[`MyComponent Render App component correctly 1`] = `
         RouteFinder
       </strong>
     </div>
+    <button
+      className="btn btn-amber btn-sm Ripple-parent toggleOptions"
+      onClick={[Function]}
+      onMouseUp={[Function]}
+      onTouchStart={[Function]}
+      type="button"
+    >
+      Toggle options
+      <div
+        className="Ripple "
+        style={
+          Object {
+            "height": "0px",
+            "left": "0px",
+            "top": "0px",
+            "width": "0px",
+          }
+        }
+      />
+    </button>
   </nav>
   <div
     className="container-fluid"
-    style={
-      Object {
-        "marginTop": "20px",
-      }
-    }
   >
+    <div />
     <div
       className="row justify-content-around"
     >
       <div
-        className="col-6"
+        className="col-12 settings-wrapper z0"
       >
         <div
-          className="card"
+          className="card settings animated fadeOutLeft"
         >
           <div
             className="card-body"
@@ -102,7 +118,87 @@ exports[`MyComponent Render App component correctly 1`] = `
                   Off
                 </span>
               </label>
+              <div
+                className="btn-group-sm dropdown"
+                onClick={[Function]}
+                onKeyDown={[Function]}
+                style={
+                  Object {
+                    "display": "inline-flex",
+                  }
+                }
+              >
+                <button
+                  aria-expanded={false}
+                  aria-haspopup={true}
+                  className="btn btn-mdb-color Ripple-parent dropdown-toggle"
+                  defaultValue=""
+                  onClick={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchStart={[Function]}
+                  type="button"
+                >
+                  Travel Mode
+                  <div
+                    className="Ripple "
+                    style={
+                      Object {
+                        "height": "0px",
+                        "left": "0px",
+                        "top": "0px",
+                        "width": "0px",
+                      }
+                    }
+                  />
+                </button>
+                <div
+                  aria-hidden={true}
+                  className="dropdown-menu"
+                  role="menu"
+                  tabIndex="-1"
+                >
+                  <button
+                    className="dropdown-item"
+                    onClick={[Function]}
+                    tabIndex="0"
+                    type="button"
+                    value="DRIVING"
+                  >
+                    Driving
+                  </button>
+                  <button
+                    className="dropdown-item"
+                    onClick={[Function]}
+                    tabIndex="0"
+                    type="button"
+                    value="BICYCLING"
+                  >
+                    Bicycling
+                  </button>
+                  <button
+                    className="dropdown-item"
+                    onClick={[Function]}
+                    tabIndex="0"
+                    type="button"
+                    value="TRANSIT"
+                  >
+                    Transit
+                  </button>
+                  <button
+                    className="dropdown-item"
+                    onClick={[Function]}
+                    tabIndex="0"
+                    type="button"
+                    value="WALKING"
+                  >
+                    Walking
+                  </button>
+                </div>
+              </div>
             </div>
+            <h3>
+              Waypoints
+            </h3>
             <ul
               className="list-group"
               style={
@@ -110,38 +206,34 @@ exports[`MyComponent Render App component correctly 1`] = `
                   "marginTop": "25px",
                 }
               }
-            />
+            >
+              No waypoints created
+            </ul>
+            <h3
+              style={
+                Object {
+                  "marginTop": "10px",
+                }
+              }
+            >
+              Routes
+            </h3>
+            <ul
+              className="list-group"
+              style={
+                Object {
+                  "marginTop": "25px",
+                }
+              }
+            >
+              No routes created
+            </ul>
           </div>
         </div>
       </div>
       <div
-        className="col-6"
-      >
-        <div
-          className="card"
-        >
-          <div
-            className="card-body"
-          >
-            <h4
-              className="card-title"
-            >
-              Map
-            </h4>
-            <div
-              id="map"
-            />
-            <ul
-              className="list-group"
-              style={
-                Object {
-                  "marginTop": "25px",
-                }
-              }
-            />
-          </div>
-        </div>
-      </div>
+        id="map"
+      />
     </div>
   </div>
 </div>

@@ -10,7 +10,13 @@ import {
     MDBInput,
     MDBCardText,
     MDBListGroup,
-    MDBListGroupItem
+    MDBListGroupItem,
+    ToastContainer,
+    toast,
+    MDBDropdown,
+    MDBDropdownToggle,
+    MDBDropdownMenu,
+    MDBDropdownItem
 } from "mdbreact";
 import {connect} from "react-redux";
 import PlacesAutocomplete, {
@@ -40,12 +46,14 @@ class App extends Component {
         tempAddress: '',
         latLng: '',
         error: false,
-        addressesCopy: []
+        addressesCopy: [],
+        css: 'settings animated fadeOutLeft',
+        wrapper: 'settings-wrapper z0',
+        travelMode: '',
+        loaded: false
     };
-
-    componentDidUpdate() {
+    componentDidMount() {
         SortableItem = SortableElement(({value}) =>
-
             <div
                 className="list-item-box">
                 <MDBListGroupItem
@@ -53,7 +61,6 @@ class App extends Component {
                 >{value}
                 </MDBListGroupItem>
             </div>);
-
         SortableList = SortableContainer(({items}) => {
             return (
                 <div>
@@ -64,7 +71,14 @@ class App extends Component {
             );
         });
     }
-
+    componentDidUpdate() {
+        if(this.state.loaded === false){
+            this.setState({
+                travelMode: google.maps.DirectionsTravelMode.DRIVING,
+                loaded: true
+            })
+        }
+    }
     setPoint = (latLng, address) => {
         this.props.google.setCenter(latLng)
         let waypoints = this.state.waypoints;
@@ -110,6 +124,7 @@ class App extends Component {
 
     }
     getNewAddress = (marker, pos) => {
+        this.dismissAll();
         let polyline = this.state.polyline;
         polyline.setMap(null);
         this.setState({
@@ -141,11 +156,14 @@ class App extends Component {
                         tempAddress: results[0].formatted_address
                     })
                 } else {
-                    console.log('Error: ', status);
+                    this.notify('pointError');
+                    markers[localPosition].setPosition(waypoints[localPosition]);
+                    this.setState({
+                        markers
+                    })
                 }
             }
         );
-
         setTimeout(() => {
             this.recreatePoly();
         }, 500);
@@ -174,28 +192,23 @@ class App extends Component {
     deleteAllMarkers = () => {
         this.state.polyline.setMap(null);
         let markers = this.state.markers;
-        let addresses = this.state.addresses;
         for (const item of markers) {
             item.setMap(null);
         }
         markers = [];
-        addresses = [];
         this.setState({
             markers,
-            addresses
+            addresses: []
         })
     }
     createRoute = () => {
+        this.dismissAll();
         if (this.state.waypoints.length < 2) {
             return;
         }
         let address = this.state.addresses;
         let addressesCopy = this.state.addressesCopy;
         addressesCopy.push({from: address[0], to: address[address.length - 1]});
-        this.setState({
-            addressesCopy
-        })
-        this.deleteAllMarkers();
         let request;
         let directionsService = new google.maps.DirectionsService();
         let directionsDisplay = new google.maps.DirectionsRenderer();
@@ -217,30 +230,34 @@ class App extends Component {
                 destination: new google.maps.LatLng(this.state.waypoints[this.state.waypoints.length - 1]),
                 waypoints: waypoints,
                 optimizeWaypoints: false,
-                travelMode: google.maps.DirectionsTravelMode.DRIVING
+                travelMode: this.state.travelMode
             };
         } else {
             request = {
                 origin: new google.maps.LatLng(this.state.waypoints[0]),
                 destination: new google.maps.LatLng(this.state.waypoints[this.state.waypoints.length - 1]),
                 optimizeWaypoints: false,
-                travelMode: google.maps.DirectionsTravelMode.DRIVING
+                travelMode: this.state.travelMode
             };
         }
-        directionsService.route(request, function (response, status) {
+        directionsService.route(request, (response, status) => {
             if (status === window.google.maps.DirectionsStatus.OK) {
+                this.deleteAllMarkers();
                 directionsDisplay.setDirections(response);
+                this.notify('routeCreated');
+                directionsDisplay.setMap(this.props.google);
+                let routes = this.state.routes;
+                routes.push(directionsDisplay);
+                this.setState({
+                    waypoints: [],
+                    routes,
+                    addressesCopy
+                });
+                this.toggleOptions();
+            } else {
+                this.notify('routeError');
             }
         });
-        directionsDisplay.setMap(this.props.google);
-        let mapWaypoints = this.state.waypoints;
-        let routes = this.state.routes;
-        mapWaypoints = [];
-        routes.push(directionsDisplay);
-        this.setState({
-            waypoints: mapWaypoints,
-            routes
-        })
 
     }
     deleteRoute = (event) => {
@@ -253,6 +270,7 @@ class App extends Component {
             routes,
             addressesCopy
         })
+        this.notify('routeDelete');
     }
     setPointAsCenter = (event) => {
         let latLng = this.state.markers[event];
@@ -297,8 +315,8 @@ class App extends Component {
             );
         });
     }
-
     handleSelect = address => {
+        this.dismissAll();
         let addresses = this.state.addresses;
         geocodeByAddress(address)
             .then(results => getLatLng(results[0]))
@@ -309,22 +327,21 @@ class App extends Component {
                     latLng,
                     addresses
                 })
+                this.setMarker(latLng, address);
             })
             .catch(() => {
-                this.setState({
-                    error: !this.state.error
-                })
+                this.setMarker();
             });
-        setTimeout(() => {
-            if (!this.state.error) {
-                this.setPoint(this.state.latLng, address)
-            } else {
-                this.setState({
-                    error: !this.state.error
-                })
-            }
-        }, 1000)
     };
+    setMarker = (latLng, address) => {
+        if (latLng) {
+            this.notify('pointCreated');
+            this.setPoint(latLng, address)
+        } else {
+            this.notify('placeError');
+        }
+    }
+
     onSortEnd = ({oldIndex, newIndex}) => {
         let polyline = this.state.polyline;
         polyline.setMap(null);
@@ -360,7 +377,82 @@ class App extends Component {
         });
 
     }
-
+    toggleOptions = () => {
+        if (this.state.css === 'settings animated fadeInLeft') {
+            this.setState({
+                css: 'settings animated fadeOutLeft',
+            })
+            setTimeout(() => {
+                this.setState({
+                    wrapper: 'settings-wrapper z0'
+                })
+            }, 500);
+        } else {
+            this.setState({
+                css: 'settings animated fadeInLeft',
+                wrapper: 'settings-wrapper'
+            })
+        }
+    }
+    notify = type => {
+        switch (type) {
+            case 'pointCreated':
+                toast.success('Waypoint created');
+                break;
+            case 'pointError':
+                toast.error('Incorrect place to draw a line');
+                break;
+            case 'placeError':
+                toast.error('Please select a place from the list');
+                break;
+            case 'routeCreated':
+                toast.success('Route created');
+                break;
+            case 'routeError':
+                toast.error('Its too far to create this route');
+                break;
+            case 'routeDelete':
+                toast.warn('Route deleted');
+                break;
+            case 'noResults':
+                toast.warn('No results for this request');
+                break;
+            default:
+                break;
+        }
+    }
+    chooseTravelMode = event => {
+        switch (event.target.value) {
+            case 'DRIVING':
+                this.setState({
+                    travelMode: google.maps.DirectionsTravelMode.DRIVING
+                })
+                break;
+            case 'WALKING':
+                this.setState({
+                    travelMode: google.maps.DirectionsTravelMode.WALKING
+                })
+                break;
+            case 'TRANSIT':
+                this.setState({
+                    travelMode: google.maps.DirectionsTravelMode.TRANSIT
+                })
+                break;
+            case 'BICYCLING':
+                this.setState({
+                    travelMode: google.maps.DirectionsTravelMode.BICYCLING
+                })
+                break;
+            default:
+                break;
+        }
+    }
+    dismissAll = () => toast.dismiss();
+    onError = (status, clearSuggestions) =>{
+        this.dismissAll();
+        this.notify('noResults');
+        clearSuggestions();
+    }
     render() {
         let item, autocomplete, itemRoute;
 
@@ -375,6 +467,7 @@ class App extends Component {
             value={this.state.valueFrom}
             onChange={valueFrom => this.setState({valueFrom})}
             onSelect={this.handleSelect}
+            onError={this.onError}
         >
             {({getInputProps, suggestions, getSuggestionItemProps, loading}) => (
                 <div>
@@ -416,14 +509,22 @@ class App extends Component {
                 {!this.props.google ? <div className="preloader">
                     <div className="spinner-grow text-info" role="status"></div>
                 </div> : false}
-                <MDBNavbar color="indigo" dark expand="md">
+                <MDBNavbar color="elegant-color-dark" dark expand="md">
                     <MDBNavbarBrand>
                         <strong className="white-text">RouteFinder</strong>
                     </MDBNavbarBrand>
+                    <MDBBtn className="toggleOptions" onClick={this.toggleOptions} color="amber" size="sm">Toggle options</MDBBtn>
                 </MDBNavbar>
-                <MDBContainer fluid style={{marginTop: '20px'}}>
+                <MDBContainer fluid>
+                    <ToastContainer
+                        className="toaster"
+                        hideProgressBar={true}
+                        newestOnTop={true}
+                        autoClose={5000}
+                    />
                     <MDBRow around>
-                        <Wrapper title="Settings" size="6">
+                        <Wrapper title="Settings" size="12" className={this.state.wrapper}
+                                 cardClassname={this.state.css}>
                             <MDBCardText>
                                 You can choose variant with arrows and press Enter to add a waypoint.
                             </MDBCardText>
@@ -439,17 +540,26 @@ class App extends Component {
                                 <label htmlFor="id-name--1" className="switch-label">Edit mode <span
                                     className="toggle--on">On</span><span
                                     className="toggle--off">Off</span></label>
+                                <MDBDropdown size="sm" style={{display: "inline-flex"}} onClick={this.chooseTravelMode}>
+                                    <MDBDropdownToggle caret color="mdb-color" defaultValue={this.state.travelMode}>Travel Mode</MDBDropdownToggle>
+                                    <MDBDropdownMenu>
+                                        <MDBDropdownItem value="DRIVING">Driving</MDBDropdownItem>
+                                        <MDBDropdownItem value="BICYCLING">Bicycling</MDBDropdownItem>
+                                        <MDBDropdownItem value="TRANSIT">Transit</MDBDropdownItem>
+                                        <MDBDropdownItem value="WALKING">Walking</MDBDropdownItem>
+                                    </MDBDropdownMenu>
+                                </MDBDropdown>
                             </div>
+                            <h3>Waypoints</h3>
                             <MDBListGroup style={{marginTop: '25px'}}>
-                                {this.state.addresses.length >= 1 ? item : false}
+                                {this.state.addresses.length >= 1 ? item : 'No waypoints created'}
+                            </MDBListGroup>
+                            <h3 style={{marginTop: '10px'}}>Routes</h3>
+                            <MDBListGroup style={{marginTop: '25px'}}>
+                                {this.state.routes.length > 0 ? itemRoute : 'No routes created'}
                             </MDBListGroup>
                         </Wrapper>
-                        <Wrapper title="Map" size="6">
-                            <GoogleMap/>
-                            <MDBListGroup style={{marginTop: '25px'}}>
-                                {this.state.routes.length > 0 ? itemRoute : false}
-                            </MDBListGroup>
-                        </Wrapper>
+                        <GoogleMap/>
                     </MDBRow>
                 </MDBContainer>
             </div>
@@ -463,6 +573,4 @@ function mapStateToProps(state) {
     };
 }
 
-export default connect(
-    mapStateToProps
-)(App);
+export default connect(mapStateToProps)(App);

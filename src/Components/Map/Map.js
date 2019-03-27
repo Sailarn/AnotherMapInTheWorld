@@ -30,7 +30,8 @@ class GoogleMap extends React.Component {
                 center: this.state.center,
                 zoom: 5,
                 mapTypeId: 'roadmap',
-                gestureHandling: 'greedy'
+                gestureHandling: 'greedy',
+                disableDefaultUI: true
             });
 
             if (this.state.loaded === false) {
