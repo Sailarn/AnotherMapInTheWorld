@@ -23,4 +23,4 @@ An autocomplete will offer you some variants from Google maps. Choose a variant 
 * Deleting chosen route from the list
 
 ## Screenshot:
-![alt text](https://i.ibb.co/tz8y40n/Another-Map-In-The-World.png)
+![alt text](https://picua.org/images/2019/03/27/f6f96c6831a6932bfddea3bc1ada882f.png)
