@@ -57,7 +57,7 @@ exports[`MyComponent Render App component correctly 1`] = `
         className="col-12 settings-wrapper z0"
       >
         <div
-          className="card settings animated fadeOutLeft"
+          className="card d-none"
         >
           <div
             className="card-body"

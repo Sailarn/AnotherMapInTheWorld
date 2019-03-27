@@ -6,22 +6,10 @@ import {googleApi} from '../../store/actions/mapAction'
 /*global google*/
 
 class GoogleMap extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            center: {lat: 46.482886, lng: 30.735430},
-            map: '',
-            loaded: false
-        };
-    }
-
-    loadGoogleData = (map) => {
-        this.props.googleApi(map);
-        this.setState({
-            loaded: true,
-            map: map
-        })
-    }
+    state = {
+        center: {lat: 46.482886, lng: 30.735430},
+        loaded: false
+    };
 
     componentDidMount() {
         setTimeout(() => {
@@ -43,15 +31,14 @@ class GoogleMap extends React.Component {
     loadGoogleData = (map) => {
         this.props.googleApi(map);
         this.setState({
-            loaded: true,
-            map: map
+            loaded: true
         })
     }
 
 
     render() {
         return (
-            <div id="map"></div>
+            <div id="map"/>
         );
     }
 }

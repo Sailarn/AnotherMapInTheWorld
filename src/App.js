@@ -47,7 +47,7 @@ class App extends Component {
         latLng: '',
         error: false,
         addressesCopy: [],
-        css: 'settings animated fadeOutLeft',
+        css: 'd-none',
         wrapper: 'settings-wrapper z0',
         travelMode: '',
         loaded: false
@@ -279,8 +279,7 @@ class App extends Component {
     }
     recreatePoly = () => {
         let waypoints = this.state.waypoints;
-        let polyline = this.state.polyline;
-        polyline = new google.maps.Polyline({
+        let polyline = new google.maps.Polyline({
             path: waypoints,
             geodesic: true,
             strokeColor: '#FF0000',
@@ -341,7 +340,6 @@ class App extends Component {
             this.notify('placeError');
         }
     }
-
     onSortEnd = ({oldIndex, newIndex}) => {
         let polyline = this.state.polyline;
         polyline.setMap(null);

@@ -4,7 +4,7 @@ self.__precacheManifest = [
     "url": "./static/media/arrow_right.8ef6a08c.svg"
   },
   {
-    "revision": "f306bebd81f34ae05736",
+    "revision": "54adeee8e7e439347028",
     "url": "./static/css/main.ae7cf06b.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = [
     "url": "./static/media/Roboto-Bold.e31fcf18.ttf"
   },
   {
-    "revision": "cbff4b108ceae73bf49b",
-    "url": "./static/js/2.986d2fd4.chunk.js"
+    "revision": "182e66cba45539022a86",
+    "url": "./static/js/2.b4b2bc03.chunk.js"
   },
   {
     "revision": "65779ebcc35604a25c2ba77309c5b8af",
@@ -28,12 +28,12 @@ self.__precacheManifest = [
     "url": "./static/media/fa-regular-400.5dd3976c.woff"
   },
   {
-    "revision": "414ff5daad323a1c47c5177d4bd29674",
-    "url": "./static/media/fa-regular-400.414ff5da.eot"
-  },
-  {
     "revision": "f6c6f6c8cb7784254ad00056f6fbd74e",
     "url": "./static/media/fa-regular-400.f6c6f6c8.ttf"
+  },
+  {
+    "revision": "414ff5daad323a1c47c5177d4bd29674",
+    "url": "./static/media/fa-regular-400.414ff5da.eot"
   },
   {
     "revision": "4b115e1153a9ea339d6a0bb284cc8ed3",
@@ -84,8 +84,8 @@ self.__precacheManifest = [
     "url": "./static/media/arrow_left.11911410.svg"
   },
   {
-    "revision": "f306bebd81f34ae05736",
-    "url": "./static/js/main.194b5405.chunk.js"
+    "revision": "54adeee8e7e439347028",
+    "url": "./static/js/main.75b35417.chunk.js"
   },
   {
     "revision": "dfe56a876d0282555d1e2458e278060f",
@@ -132,12 +132,12 @@ self.__precacheManifest = [
     "url": "./static/media/Roboto-Thin.7500519d.woff"
   },
   {
-    "revision": "3b813c2ae0d04909a33a18d792912ee7",
-    "url": "./static/media/Roboto-Light.3b813c2a.woff"
-  },
-  {
     "revision": "ba3dcd8903e3d0af5de7792777f8ae0d",
     "url": "./static/media/Roboto-Regular.ba3dcd89.woff"
+  },
+  {
+    "revision": "3b813c2ae0d04909a33a18d792912ee7",
+    "url": "./static/media/Roboto-Light.3b813c2a.woff"
   },
   {
     "revision": "fc78759e93a6cac50458610e3d9d63a0",
@@ -164,11 +164,11 @@ self.__precacheManifest = [
     "url": "./static/media/Roboto-Medium.894a2ede.ttf"
   },
   {
-    "revision": "cbff4b108ceae73bf49b",
+    "revision": "182e66cba45539022a86",
     "url": "./static/css/2.b3255096.chunk.css"
   },
   {
-    "revision": "c3f814077b35fdfe177b50ad3ee64d49",
+    "revision": "4f5499c1e5f70a27658f03cc43d0a95c",
     "url": "./index.html"
   }
 ];
