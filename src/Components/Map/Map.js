@@ -7,13 +7,11 @@ import {googleApi} from '../../store/actions/mapAction'
 
 class GoogleMap extends React.Component {
     state = {
-        center: {lat: 46.482886, lng: 30.735430},
-        loaded: false
+        center: {lat: 46.482886, lng: 30.735430}
     };
 
     componentDidMount() {
         setTimeout(() => {
-
             let map = new google.maps.Map(document.getElementById('map'), {
                 center: this.state.center,
                 zoom: 5,
@@ -21,19 +19,13 @@ class GoogleMap extends React.Component {
                 gestureHandling: 'greedy',
                 disableDefaultUI: true
             });
-
-            if (this.state.loaded === false) {
-                this.loadGoogleData(map);
-            }
-        }, 500)
-    }
+            this.loadGoogleData(map);
+        }, 500);
+    };
 
     loadGoogleData = (map) => {
         this.props.googleApi(map);
-        this.setState({
-            loaded: true
-        })
-    }
+    };
 
 
     render() {

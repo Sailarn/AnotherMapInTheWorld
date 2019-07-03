@@ -44,6 +44,9 @@
     justify-content: center;
     align-items: stretch;
 }
+.list-item-box:hover{
+    cursor: pointer;
+}
 .preloader{
     position: absolute;
     top: 0;
